@@ -1,0 +1,13 @@
+<form ng-submit="beginStream()">
+	<button>Watch Entire Twitter Stream</button>
+</form><br />
+
+<form ng-submit="beginStream(filter)">
+	<label for="filterContent">Search Trend</label>
+	<input id="filterContent" type="text" ng-model="filter" required />
+	<button>Watch Twitter Stream for Trend</button>
+</form><br />
+
+<span ng-if="active" disabled>Streaming Tweets...</span>
+
+<globe data="coordinates"></globe>
