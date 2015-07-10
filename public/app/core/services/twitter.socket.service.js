@@ -11,22 +11,41 @@ angular.module( 'app.core' )
 		getStream: function() {
 			return socket;
 		},
-		startStream: function(filter) {
+		beginStream: function(filter) {
 			if(filter) {
 				filter = encodeURIComponent(filter);
     			socket.emit('track', filter);
 
 				return $http.get('/oauth/' + filter)
-					.error(function() {
-						console.error('Error starting stream');
+					.then(function(data) {
+						var tweets = data.data.statuses;
+						var coords = [];
+
+						for(var i = 0; i < tweets.length; i++) {
+							var tweet = tweets[i];
+
+							if(tweet.coordinates) {
+								coords.push('tweet', tweet.coordinates.coordinates);
+							}
+							else if(tweet.place) {
+								var box = tweet.place.bounding_box.coordinates[0];
+								if(box[0][0] - box[2][0] < 1.5) {
+									coords.push([ ( box[0][0] + box[2][0] ) / 2, ( box[0][1] + box[1][1] ) / 2]);
+								}
+							}
+						}
+
+						return coords;
+					}, function(err) {
+						console.error('Error getting previous tweets');
 					});
 			}
 			else {
     			socket.emit('track', 'all');
 
 				return $http.get('/oauth/all')
-					.error(function() {
-						console.error('Error starting stream');
+					.then(function(data) {
+						return [];
 					});
 			}
 		}

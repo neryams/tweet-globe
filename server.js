@@ -47,16 +47,20 @@ io.on('connection', function(socket) {
 		console.log('tracking ' + track);
 
 		t.on('tweet', function (tweet) {
+			var coordinates;
 			if(tweet.coordinates) {
 				console.log(tweet.coordinates.coordinates);
-				socket.emit('tweet', tweet.coordinates.coordinates);
 			}
 			else if(tweet.place) {
 				var box = tweet.place.bounding_box.coordinates[0];
 				if(box[0][0] - box[2][0] < 1.5) {
-					console.log([ ( box[0][0] + box[2][0] ) / 2, ( box[0][1] + box[1][1] ) / 2]);
-					socket.emit('tweet', [ ( box[0][0] + box[2][0] ) / 2, ( box[0][1] + box[1][1] ) / 2]);
+					coordinates = [ ( box[0][0] + box[2][0] ) / 2, ( box[0][1] + box[1][1] ) / 2];
 				}
+			}
+
+			if(coordinates) {
+				console.log(coordinates);
+				socket.emit('tweet-' + tracking, coordinates);
 			}
 		});
 	});
