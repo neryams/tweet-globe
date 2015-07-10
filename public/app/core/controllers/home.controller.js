@@ -11,7 +11,16 @@ angular.module( 'app.core' )
 	$scope.coordinates = [];
 	$scope.active = '';
 
+	var duplicatesCheck;
+	var addTweet = function(data) {
+		if(duplicatesCheck[data.id] === undefined && data.tracking === $scope.active) {
+			$scope.coordinates.push(data.coordinates);
+			duplicatesCheck[data.id] = true;
+		}
+	};
+
 	$scope.beginStream = function(filter) {
+		duplicatesCheck = {};
 		$scope.coordinates = [];
 		var stream = twitterSocket.getStream();
 
@@ -24,16 +33,13 @@ angular.module( 'app.core' )
 		}
 
 		if(filter) {
-			stream.on('tweet-'+filter, function(data) {
-				$scope.coordinates.push(data);
-			});
+			stream.on('tweet-'+filter, addTweet);
+			$scope.active = filter;
 		}
 		else {
-			stream.on('tweet-all', function(data) {
-				$scope.coordinates.push(data);
-			});
+			stream.on('tweet-all', addTweet);
+			$scope.active = 'all';
 		}
-		$scope.active = filter;
 	};
 })
 

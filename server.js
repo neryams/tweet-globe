@@ -60,7 +60,7 @@ io.on('connection', function(socket) {
 
 			if(coordinates) {
 				console.log(coordinates);
-				socket.emit('tweet-' + tracking, coordinates);
+				socket.emit('tweet-' + tracking, { tracking: tracking, id: tweet.id, coordinates: coordinates });
 			}
 		});
 	});
