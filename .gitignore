@@ -1,4 +1,4 @@
-/node_modules/*
+elasticsearch-*
 
 # Packages #
 ############
@@ -20,8 +20,10 @@ resources/
 
 # Compiled files     #
 ######################
-**/css/*
-**/vendor/*
+node_modules/
+bower_components/
+dev/
+.sass-cache
 
 # Logs and databases #
 ######################

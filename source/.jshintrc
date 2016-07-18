@@ -1,0 +1,5 @@
+{
+  "predef": [ "$", "angular", "THREE" ],
+  "devel": true,
+  "browser": true
+}

@@ -10,7 +10,7 @@ var server = app.listen(5000, function() {
 
 var io = require('socket.io')(server);
 
-var rootDir = '/public';
+var rootDir = '/';
 var auth = {
 	consumer_key: '8zOskEZPbBrVbEgZeJ9QCDwsf',
 	consumer_secret: '83uiOlJlTEOvj4dQCnSxCv0C2byWwfarSyrIhxlEfhfbUvcwsC',
@@ -28,15 +28,7 @@ io.on('connection', function(socket) {
 	var t = new Twitter(auth);
 
 	socket.on('track', function(track) {
-		if(tracking === 'all') {
-			console.log('untrack all');
-			t.unlocate('-180,-90,180,90', false)
-		}
-		else if(tracking) {
-			console.log('untrack ' + tracking);
-			t.untrack(tracking, false);
-		}
-		tracking = track;
+		untrack();
 
 		if(track !== 'all') {
 			t.track(track, true);
@@ -49,7 +41,9 @@ io.on('connection', function(socket) {
 		t.on('tweet', function (tweet) {
 			var coordinates;
 			if(tweet.coordinates) {
-				console.log(tweet.coordinates.coordinates);
+				if(tweet.coordinates.type === 'Point') {
+					coordinates = tweet.coordinates.coordinates;
+				}
 			}
 			else if(tweet.place) {
 				var box = tweet.place.bounding_box.coordinates[0];
@@ -63,22 +57,29 @@ io.on('connection', function(socket) {
 				socket.emit('tweet-' + tracking, { tracking: tracking, id: tweet.id, coordinates: coordinates });
 			}
 		});
+		
+		tracking = track;
 	});
 
 	socket.on('disconnect', function() {
-		if(tracking === 'all') {
-			console.log('untrack all');
-			t.unlocate('-180,-90,180,90', true)
-		}
-		else if(tracking) {
-			console.log('untrack ' + tracking);
-			t.untrack(tracking, true);
-		}
+		untrack();
+
 		if(t && t.stream) {
 			t.abort();
 		}
 		console.log('Got disconnect!');
 	});
+
+	function untrack() {
+		if(tracking === 'all') {
+			console.log('untrack all');
+			t.unlocate('-180,-90,180,90', true);
+		}
+		else if(tracking) {
+			console.log('untrack ' + tracking);
+			t.untrack(tracking, true);
+		}
+	}
 });
 
 app.get('/oauth/:track', function(req, res) {
@@ -89,8 +90,8 @@ app.get('/oauth/:track', function(req, res) {
 
 		var options = {
 		    hostname: 'api.twitter.com',
-		    path: '/1.1/search/tweets.json?count=100&q=' + encodeURIComponent(req.params.track),
-			method: 'GET',
+		    path: '/1.1/search/tweets.json?count=100&geocode=0,0,12500mi&q=' + encodeURIComponent(req.params.track),
+				method: 'GET',
 		    headers: {
 		        Authorization: 'Bearer ' + access_token
 		    }

@@ -1,0 +1,27 @@
+<div class="controls">
+	<form ng-submit="beginStream()">
+		<div class="row">
+			<div class="small-12 columns">
+				<button class="expanded button">Watch Entire Twitter Stream</button>
+			</div>
+		</div>
+	</form>
+
+	<form ng-submit="beginStream(filter)">
+		<div class="row">
+			<div class="small-12 columns">
+				<label for="filterContent">Search Trend</label>
+				<div class="input-group">
+					<input class="input-group-field" id="filterContent" type="text" ng-model="filter" required />
+				  <div class="input-group-button">
+						<button class="button">Watch Twitter Stream for Trend</button>
+				  </div>
+				</div>
+			</div>
+		</div>
+	</form>
+</div>
+
+<span ng-if="active" disabled>Streaming Tweets...</span>
+
+<globe data="coordinates"></globe>

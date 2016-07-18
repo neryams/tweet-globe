@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html ng-app="app" ng-controller="AppCtrl">
+	<head>
+		<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+		<title>{{pageTitle}} | Twitter Globe</title>
+		<meta name="viewport" content="width=device-width, initial-scale=1">
+	</head>
+	<body>
+  	<div class="container" ui-view="header"></div>
+  	<div class="container" ui-view></div>
+
+		<script class="lib" type="text/javascript" src="../bower_components/three.js/three.js"></script>
+		<script class="lib" type="text/javascript" src="../bower_components/tween.js/src/Tween.js"></script>
+		<script class="lib" type="text/javascript" src="../bower_components/socket.io-client/socket.io.js"></script>
+		<script class="lib" type="text/javascript" src="../bower_components/angular/angular.js"></script>
+		<script class="lib" type="text/javascript" src="../bower_components/angular-ui-router/release/angular-ui-router.js"></script>
+		<script class="lib" type="text/javascript" src="../bower_components/angular-socket-io/socket.js"></script>
+
+		<script type="text/javascript" src="./app.js"></script>
+		<script type="text/javascript" src="./core/core.js"></script>
+		<script type="text/javascript" src="./core/services/twitter.socket.service.js"></script>
+		<script type="text/javascript" src="./core/services/globe.service.js"></script>
+		<script type="text/javascript" src="./core/directives/globe.directive.js"></script>
+		<script type="text/javascript" src="./core/controllers/home.controller.js"></script>
+
+		<!-- include: "type": "js", "files": "scripts/**/*.js" -->
+	</body>
+</html>
