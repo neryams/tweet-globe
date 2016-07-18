@@ -23,6 +23,7 @@ resources/
 node_modules/
 bower_components/
 dev/
+bin/
 .sass-cache
 
 # Logs and databases #

@@ -18,7 +18,6 @@
     "angular-ui-router": "^0.3.1",
     "angular-socket-io": "^0.7.0",
     "socket.io-client": "^1.4.8",
-    "kibana": "^4.5.3",
     "foundation-sites": "^6.2.3",
     "webgl-globe": "git@github.com:dataarts/webgl-globe.git",
     "three.js": "~0.70.0",
