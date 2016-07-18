@@ -14,7 +14,7 @@
 (function() {
 	'use strict';
 
-	angular.module( 'app.core' )
+	angular.module( 'app.globe' )
 	.factory('webGLGlobe', ['$window', function webGLGlobeService($window) {
 		var service = {
 			Globe: Globe

@@ -1,14 +1,14 @@
 (function() {
 	'use strict';
 
-	angular.module( 'app.core' )
+	angular.module( 'app.globe' )
 	.directive('globe', ['webGLGlobe', function GlobeDirective(webGLGlobe) {
 		return {
 			restrict: 'E',
 			scope: {
 				data: '='
 			},
-			templateUrl: 'core/directives/templates/globe.html',
+			templateUrl: 'globe/directives/templates/globe.html',
 			link: function(scope, element) {
 				var points,
 						max = 10,

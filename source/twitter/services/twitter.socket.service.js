@@ -1,7 +1,7 @@
 (function() {
 	'use strict';
 
-	angular.module( 'app.core' )
+	angular.module( 'app.twitter' )
 	.factory('twitterSocket', ['$http', '$location', '$window', 'socketFactory', function TwitterSocketService($http, $location, $window, socketFactory) {
 		var socket = socketFactory({
 			ioSocket: $window.io.connect('http://' + $location.host() + ':' + $location.port())
