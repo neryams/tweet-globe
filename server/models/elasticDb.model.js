@@ -4,52 +4,77 @@ var config = require('../config'),
 		elasticsearch = require('elasticsearch'),
 		_ = require('lodash');
 
-var mappingParams = { 
-	index: config.elasticIndex,
-	body: {
-    properties: {
-    	user_id:  { type: 'string', index: 'not_analyzed' },
-      created:  { type: 'date' },
-      location: { type: 'geo_point' },
-      message:  { type: 'string' }
-    }
-	}
+var TwitterElastic = function TwitterElastic(type) {
+	this.type = type;
 };
 
-var TwitterElastic = function TwitterElastic() {
-	this.client = new elasticsearch.Client({
+TwitterElastic.connect = connect;
+TwitterElastic.newMapping = newMapping;
+TwitterElastic.prototype.addTweet = function(tweetId, data) {
+	return addTweet(tweetId, this.type, data);
+};
+
+var client,
+		mappingParams = { 
+			index: config.elasticIndex,
+			body: {
+			  properties: {
+			  	user_id:  { type: 'string', index: 'not_analyzed' },
+			    created:  { type: 'date' },
+			    location: { type: 'geo_point' },
+			    message:  { type: 'string' }
+			  }
+			}
+		};
+
+function connect() {
+	client = new elasticsearch.Client({
 	  host: 'localhost:9200',
 	  log: 'trace'
 	});
 
-	this.client.indices.exists({index: config.elasticIndex}).then(function(exists) {
+	return client.indices.exists({index: config.elasticIndex}).then(function(exists) {
 		console.log('index exists?', exists);
 		if(!exists) {
-			return this.client.indices.create({ index: config.elasticIndex });
+			return client.indices.create({ index: config.elasticIndex });
 		}
-	});
-};
 
-TwitterElastic.prototype.createMap = function createMap(track) { 
+		return exists;
+	});
+}
+
+function newMapping(type) {
+	return createMap(type).then(function() {
+		return new TwitterElastic(type);
+	});
+}
+
+function createMap(track) {
+	if(!client) {
+		return connect().then(function() { return createMap(track); });
+	}
 	var mappingParamsTrack = _.assign({ type: track }, mappingParams);
 	console.log(mappingParamsTrack);
 
-	return this.client.indices.getMapping({ index: config.elasticIndex, type: track }).then(function(result) {
+	return client.indices.getMapping({ index: config.elasticIndex, type: track }).then(function(result) {
 		console.log('mapping result:', JSON.stringify(result));
 		if(_.isEmpty(result)) {
-			return this.client.indices.putMapping(mappingParamsTrack).then(function() {
+			return client.indices.putMapping(mappingParamsTrack).then(function() {
 				console.log('Added mapping to elasticsearch: ', JSON.stringify(mappingParamsTrack));
 			});
 		} else {
 			return result;
 		}
 	});
-};
+}
 
-TwitterElastic.prototype.addTweet = function addTweet(tweetId, track, data) { 
-	this.client.create({
+function addTweet(tweetId, type, data) { 
+	if(!client) {
+		return connect().then(function() { return addTweet(tweetId, type, data); });
+	}
+	return client.create({
 	  index: config.elasticIndex,
-	  type: track,
+	  type: type,
 	  id: tweetId,
 	  body: data
 	}).then(function(response) {
@@ -57,6 +82,6 @@ TwitterElastic.prototype.addTweet = function addTweet(tweetId, track, data) {
 	}, function (error) {
 	  console.error('Could not save to elasticsearch: ', error);
 	});
-};
+}
 
 module.exports = TwitterElastic;

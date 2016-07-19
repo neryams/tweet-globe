@@ -9,7 +9,7 @@
 				'': {
 					controller: 'HomeCtrl',
 					templateUrl: 'core/views/home.view.html'
-				},		
+				},
 				'header': {
 					templateUrl: 'core/views/header.view.html'
 				}

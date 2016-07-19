@@ -5,9 +5,11 @@ var config = require('./config'),
 		moment = require('moment'),
 		elasticDbConnection = require('./models/elasticDb.model');
 
+elasticDbConnection.connect();
+
 exports.init = function(server) {
 	var io = require('socket.io')(server),
-			elasticTweets = new elasticDbConnection();
+			elasticTweets;
 
 	io.on('connection', function(socket) {
 		console.log('Got connect!');
@@ -18,7 +20,8 @@ exports.init = function(server) {
 		socket.on('track', function(track) {
 			untrack();
 
-			elasticTweets.createMap(track).then(function() {
+			elasticDbConnection.newMapping(track).then(function(elasticTweetHandler) {
+				elasticTweets = elasticTweetHandler;
 				if(track !== 'all') {
 					t.track(track, true);
 				}
@@ -44,7 +47,7 @@ exports.init = function(server) {
 
 				if(coordinates) {
 					console.log(coordinates);
-					elasticTweets.addTweet(tweet.id + '', track, {
+					elasticTweets.addTweet(tweet.id + '', {
 		      	user_id:  tweet.user.id + '',
 		        created:  moment(tweet.created_at, 'ddd MMM DD HH:mm:ss Z YYYY').format(),
 		        location: coordinates,
@@ -64,7 +67,7 @@ exports.init = function(server) {
 				t.abort();
 			}
 		});
-		
+
 		socket.on('disconnect', function() {
 			untrack();
 
