@@ -57,6 +57,14 @@ exports.init = function(server) {
 			tracking = track;
 		});
 
+		socket.on('stoptracking', function() {
+			untrack();
+
+			if(t && t.stream) {
+				t.abort();
+			}
+		});
+		
 		socket.on('disconnect', function() {
 			untrack();
 

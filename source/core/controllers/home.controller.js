@@ -4,22 +4,16 @@
 	angular.module( 'app.core' )
 	.controller('HomeCtrl', ['$scope', 'twitterSocket', function HomeController( $scope, twitterSocket ) {
 		/*$scope.$on('authenticated', function() {
-	        $scope.twitter.get('/1.1/search/tweets.json?q=fifa&count=100&geocode=0,0,3000mi').done(function(data) {
-	            $scope.data = data;
-	        });
+					$scope.twitter.get('/1.1/search/tweets.json?q=fifa&count=100&geocode=0,0,3000mi').done(function(data) {
+							$scope.data = data;
+					});
 		});*/
 		$scope.coordinates = [];
 		$scope.active = '';
 
 		var duplicatesCheck;
-		var addTweet = function(data) {
-			if(duplicatesCheck[data.id] === undefined && data.tracking === $scope.active) {
-				$scope.coordinates.push(data.coordinates);
-				duplicatesCheck[data.id] = true;
-			}
-		};
 
-		$scope.beginStream = function(filter) {
+		$scope.beginStream = function beginStream(filter) {
 			duplicatesCheck = {};
 			var stream = twitterSocket.getStream();
 
@@ -42,5 +36,17 @@
 				$scope.active = 'all';
 			}
 		};
+
+		$scope.stopStream = function stopStream() {
+			$scope.active = '';
+			twitterSocket.stopStream();
+		};
+
+		function addTweet(data) {
+			if(duplicatesCheck[data.id] === undefined && data.tracking === $scope.active) {
+				$scope.coordinates.push(data.coordinates);
+				duplicatesCheck[data.id] = true;
+			}
+		}
 	}]);
 })();
