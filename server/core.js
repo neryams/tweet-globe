@@ -12,7 +12,7 @@ exports.init = function(server) {
 			elasticTweets;
 
 	io.on('connection', function(socket) {
-		console.log('Got connect!');
+		console.log('Connecting');
 		var tracking;
 
 		var t = new Twitter(config.OAuth2);
@@ -28,7 +28,7 @@ exports.init = function(server) {
 				else {
 					t.location('-180,-90,180,90', true);
 				}
-				console.log('tracking ' + track);
+				console.log('Tracking ' + track);
 			});
 
 			t.on('tweet', function (tweet) {
@@ -46,7 +46,6 @@ exports.init = function(server) {
 				}
 
 				if(coordinates) {
-					console.log(coordinates);
 					elasticTweets.addTweet(tweet.id + '', {
 		      	user_id:  tweet.user.id + '',
 		        created:  moment(tweet.created_at, 'ddd MMM DD HH:mm:ss Z YYYY').format(),
@@ -74,16 +73,16 @@ exports.init = function(server) {
 			if(t && t.stream) {
 				t.abort();
 			}
-			console.log('Got disconnect!');
+			console.log('Disconnecting');
 		});
 
 		function untrack() {
 			if(tracking === 'all') {
-				console.log('untrack all');
+				console.log('Untracking all');
 				t.unlocate('-180,-90,180,90', true);
 			}
 			else if(tracking) {
-				console.log('untrack ' + tracking);
+				console.log('Untracking ' + tracking);
 				t.untrack(tracking, true);
 			}
 		}
