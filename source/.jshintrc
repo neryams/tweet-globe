@@ -1,5 +1,5 @@
 {
-  "predef": [ "$", "angular", "THREE" ],
+  "predef": [ "_", "angular", "THREE", "TWEEN" ],
   "devel": true,
   "browser": true
 }

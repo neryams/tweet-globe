@@ -21,7 +21,8 @@
     "foundation-sites": "^6.2.3",
     "webgl-globe": "git@github.com:dataarts/webgl-globe.git",
     "three.js": "~0.70.0",
-    "tween.js": "tweenjs#^16.3.4"
+    "tween.js": "tweenjs#^16.3.4",
+    "lodash": "^4.13.1"
   },
   "resolutions": {
     "three.js": "~0.70.0"
