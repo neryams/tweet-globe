@@ -11,10 +11,7 @@
 		$scope.coordinates = [];
 		$scope.active = '';
 
-		var duplicatesCheck;
-
 		$scope.beginStream = function beginStream(filter) {
-			duplicatesCheck = {};
 			var stream = twitterSocket.getStream();
 
 			twitterSocket.beginStream(filter).then(function(data) {
@@ -42,10 +39,18 @@
 			twitterSocket.stopStream();
 		};
 
+		$scope.getFiltered = function getFiltered(filter) {
+			twitterSocket.getPreviousTweets($scope.active, filter).then(function(data) {
+				$scope.coordinates = data;
+				$scope.filtering = !!filter;
+			});
+		};
+
 		function addTweet(data) {
-			if(duplicatesCheck[data.id] === undefined && data.tracking === $scope.active) {
-				$scope.coordinates.push(data.coordinates);
-				duplicatesCheck[data.id] = true;
+			if(data.tracking === $scope.active) {
+				if(!$scope.filtering) {
+					$scope.coordinates.push(data.coordinates);
+				}
 			}
 		}
 	}]);

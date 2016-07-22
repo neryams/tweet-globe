@@ -1,14 +1,17 @@
 <div class="controls">
 	<div class="row" ng-if="!active">
 		<div class="small-12 columns">
+
 			<form ng-submit="beginStream()">
 				<button class="expanded button">Watch Entire Twitter Stream</button>
 			</form>
+
 		</div>
 	</div>
 
 	<div class="row" ng-if="!active">
 		<div class="small-12 columns">
+
 			<form ng-submit="beginStream(filter)">
 				<label for="filterContent">Search Trend</label>
 				<div class="input-group">
@@ -18,15 +21,35 @@
 					</div>
 				</div>
 			</form>
+
 		</div>
 	</div>
 
 	<div class="row" ng-if="active">
 		<div class="small-12 columns">
+
 			<form ng-submit="stopStream()">
 				<button class="expanded button">Stop Streaming</button>
 			</form>
+
+			<form ng-if="active === 'all' && !filtering" ng-submit="getFiltered(inlineFilter)">
+				<label for="filterContent">Query Stream Data</label>
+				<div class="input-group">
+					<input class="input-group-field" id="filterContent" type="text" ng-model="inlineFilter" required />
+					<div class="input-group-button">
+						<button class="button">Run</button>
+					</div>
+				</div>
+			</form>
+
+			<form ng-submit="getFiltered(false)" ng-if="filtering">
+				<button class="expanded button">Clear Filter</button>
+			</form>
+
 		</div>
+	</div>
+
+	<div class="row">
 	</div>
 </div>
 

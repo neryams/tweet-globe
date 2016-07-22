@@ -10,6 +10,7 @@ var TwitterElastic = function TwitterElastic(type) {
 
 TwitterElastic.connect = connect;
 TwitterElastic.newMapping = newMapping;
+TwitterElastic.pullFromLocal = pullFromLocal;
 TwitterElastic.prototype.addTweet = function(tweetId, data) {
 	return addTweet(tweetId, this.type, data);
 };
@@ -30,7 +31,18 @@ var client,
 function connect() {
 	client = new elasticsearch.Client({
 	  host: 'localhost:9200',
-	  log: 'trace'
+	  log: [
+	    {
+	      type: 'stdio',
+	      level: 'error'
+	    },
+	    {
+	      type: 'file',
+	      level: 'trace',
+	      // config options specific to file type loggers
+	      path: 'elasticsearch.log' 
+	    }
+	  ]
 	});
 
 	return client.indices.exists({index: config.elasticIndex}).then(function(exists) {
@@ -81,6 +93,39 @@ function addTweet(tweetId, type, data) {
 		return response;
 	}, function (error) {
 	  console.error('Could not save to elasticsearch: ', error);
+	});
+}
+
+function pullFromLocal(type, track) {
+	if(!client) {
+		return connect().then(function() { return pullFromLocal(track); });
+	}
+
+	var query = {
+	  query: { 
+	    bool: { 
+	      filter: [ 
+	        { range: { created: { gte: "now-1h" }}} 
+	      ]
+	    }
+	  }
+	};
+
+	if(track) {
+		query.query.bool.must = _.map(track.split(' '), function(term) {
+			return { match: { message: term } };
+		});
+	}
+
+	return client.search({
+	  index: config.elasticIndex,
+	  type: type,
+	  body: query,
+	  size: 500
+	}).then(function(response) {
+		return response.hits;
+	}, function (error) {
+	  console.error('Could not load from elasticsearch: ', error);
 	});
 }
 

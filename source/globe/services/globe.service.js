@@ -360,6 +360,7 @@
 
 			function animate() {
 				requestAnimationFrame(animate);
+				TWEEN.update();
 				render();
 			}
 

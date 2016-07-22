@@ -3,6 +3,15 @@
 
 	angular.module( 'app.globe' )
 	.directive('globe', ['webGLGlobe', function GlobeDirective(webGLGlobe) {
+
+		var settime = function(globe, t, length) {
+			return function() {
+				var tween = new TWEEN.Tween(globe);
+				tween.to({ time: t/length }, 100).easing(TWEEN.Easing.Cubic.Out);
+				tween.start();
+			};
+		};
+
 		return {
 			restrict: 'E',
 			scope: {
@@ -12,7 +21,8 @@
 			link: function(scope, element) {
 				var points,
 						max = 10,
-						map = {};
+						map = {},
+						intervalLength = 0;
 
 				var container = element.children()[0];
 
@@ -28,6 +38,11 @@
 				scope.$watch('data.length', function(dataLength, dataLengthPrev) {
 					var data = scope.data,
 							key;
+
+					if(dataLengthPrev > dataLength) {
+						dataLengthPrev = 0;
+						map = {};
+					}
 
 					for(var i = dataLengthPrev; i < dataLength; i++) {
 						key = Math.floor(data[i][0]) + ',' + Math.floor(data[i][1]);
@@ -47,20 +62,21 @@
 						newPoints.push(coords[1], coords[0], map[key] / max);
 					}
 
-					if(!points || newPoints.length > points.length) {
+					if(!points || newPoints.length > points.length || dataLengthPrev === 0) {
 						if(points) {
 							globe.removeAllPoints();
 						}
 
-					  globe.addData( newPoints, {format: 'magnitude', name: 'sample', animated: false} );
+						intervalLength++;
+						globe.addData( newPoints, {format: 'magnitude', name: 'tweets' + dataLength, animated: false} );
 						globe.createPoints();
-
-						if(!points) {
-							globe.animate();
-						}
-
-						points = newPoints;
+						//settime(globe, intervalLength - 1, intervalLength)();
 					}
+					if(!points) {
+						globe.animate();
+					}
+
+					points = newPoints;
 				}, true);
 			}
 		};

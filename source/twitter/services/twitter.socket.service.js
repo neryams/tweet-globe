@@ -6,7 +6,8 @@
 		var service = {
 			getStream: getStream,
 			beginStream: beginStream,
-			stopStream: stopStream
+			stopStream: stopStream,
+			getPreviousTweets: getPreviousTweets
 		};
 
 		var socket = socketFactory({
@@ -20,23 +21,18 @@
 		function beginStream(filter) {
 			if(filter) {
 				filter = encodeURIComponent(filter);
-					socket.emit('track', filter);
-
-				return $http.get('/oauth/' + filter)
-					.then(function(data) {
-						return getTweetCoordinates(data.data.statuses);
-					}, function(err) {
-						console.error('Error getting previous tweets');
-					});
 			}
 			else {
-				socket.emit('track', 'all');
-
-				return $http.get('/oauth/all')
-					.then(function(data) {
-						return getTweetCoordinates(data.data.statuses);
-					});
+				filter = 'all';
 			}
+			socket.emit('track', filter);
+
+			return $http.get('/oauth/' + filter)
+				.then(function(result) {
+					return getTweetCoordinates(result.data.statuses);
+				}, function(err) {
+					console.error('Error getting tweets');
+				});
 		}
 
 		function stopStream() {
@@ -49,8 +45,11 @@
 			for(var i = 0; i < tweets.length; i++) {
 				var tweet = tweets[i];
 
+				if(tweet.location) {
+					coords.push(tweet.location);
+				}
 				if(tweet.coordinates) {
-					coords.push('tweet', tweet.coordinates.coordinates);
+					coords.push(tweet.coordinates.coordinates);
 				}
 				else if(tweet.place) {
 					var box = tweet.place.bounding_box.coordinates[0];
@@ -61,6 +60,23 @@
 			}
 
 			return coords;
+		}
+
+		function getPreviousTweets(type, filter) {
+			var url;
+			if(filter) {
+				url = '/query/' + type + '/' + filter;
+			}
+			else {
+				url = '/query/' + type;
+			}
+
+			return $http.get(url)
+				.then(function(result) {
+					return getTweetCoordinates(_.map(result.data.hits, '_source'));
+				}, function(err) {
+					console.error('Error getting previous tweets');
+				});
 		}
 
 		return service;
