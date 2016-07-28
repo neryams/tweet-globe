@@ -3,23 +3,7 @@
 		<div class="small-12 columns">
 
 			<form ng-submit="beginStream()">
-				<button class="expanded button">Watch Entire Twitter Stream</button>
-			</form>
-
-		</div>
-	</div>
-
-	<div class="row" ng-if="!active">
-		<div class="small-12 columns">
-
-			<form ng-submit="beginStream(filter)">
-				<label for="filterContent">Search Trend</label>
-				<div class="input-group">
-					<input class="input-group-field" id="filterContent" type="text" ng-model="filter" required />
-					<div class="input-group-button">
-						<button class="button">Watch Twitter Stream for Trend</button>
-					</div>
-				</div>
+				<button class="expanded button">Start Watching Entire Twitter Stream</button>
 			</form>
 
 		</div>
@@ -27,10 +11,6 @@
 
 	<div class="row" ng-if="active">
 		<div class="small-12 columns">
-
-			<form ng-submit="stopStream()">
-				<button class="expanded button">Stop Streaming</button>
-			</form>
 
 			<form ng-if="active === 'all' && !filtering" ng-submit="getFiltered(inlineFilter)">
 				<label for="filterContent">Query Stream Data</label>
@@ -42,8 +22,18 @@
 				</div>
 			</form>
 
-			<form ng-submit="getFiltered(false)" ng-if="filtering">
-				<button class="expanded button">Clear Filter</button>
+			<div class="callout" ng-if="filtering">
+			  <p>Showing results for <strong>{{filtering}}</strong> from elasticsearch</p>
+				<form ng-submit="getFiltered(false)" ng-if="filtering">
+					<button class="button">Clear Filter</button>
+				</form>
+			  <button class="close-button" aria-label="Dismiss alert" type="button" ng-click="getFiltered(false)" data-close>
+			    <span aria-hidden="true">&times;</span>
+			  </button>
+			</div>
+
+			<form ng-submit="stopStream()">
+				<button class="alert button">Stop Streaming</button>
 			</form>
 
 		</div>

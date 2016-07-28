@@ -1,3 +1,4 @@
+/* jshint debug: true */
 (function() {
 	'use strict';
 
@@ -19,10 +20,9 @@
 			},
 			templateUrl: 'globe/directives/templates/globe.html',
 			link: function(scope, element) {
-				var points,
+				var initialized = false,
 						max = 10,
-						map = {},
-						intervalLength = 0;
+						map = {};
 
 				var container = element.children()[0];
 
@@ -37,7 +37,9 @@
 
 				scope.$watch('data.length', function(dataLength, dataLengthPrev) {
 					var data = scope.data,
-							key;
+							key, coords,
+							oldMax = max,
+							changedPoints = {};
 
 					if(dataLengthPrev > dataLength) {
 						dataLengthPrev = 0;
@@ -50,33 +52,44 @@
 							map[key] = 0;
 						}
 						map[key]++;
+						changedPoints[key] = map[key];
 
-						if(max < map[key]) {
-							max = map[key];
+						while(max < map[key]) {
+							max += Math.ceil(max / 10);
 						}
 					}
-					var newPoints = [], coords;
 
-					for(key in map) {
-						coords = key.split(',');
-						newPoints.push(coords[1], coords[0], map[key] / max);
-					}
 
-					if(!points || newPoints.length > points.length || dataLengthPrev === 0) {
-						if(points) {
+					if(!initialized || dataLengthPrev === 0) {
+						var newPoints = [];
+						for(key in map) {
+							coords = key.split(',');
+							newPoints.push(coords[1], coords[0], map[key] / max);
+						}
+						if(initialized) {
 							globe.removeAllPoints();
 						}
 
-						intervalLength++;
 						globe.addData( newPoints, {format: 'magnitude', name: 'tweets' + dataLength, animated: false} );
 						globe.createPoints();
-						//settime(globe, intervalLength - 1, intervalLength)();
-					}
-					if(!points) {
-						globe.animate();
-					}
 
-					points = newPoints;
+						if(!initialized) {
+							globe.animate();
+							initialized = true;
+						}
+					}
+					else if(oldMax !== max) {
+						for(key in map) {
+							coords = key.split(',');
+							globe.updateDataPointMagnitude(coords[1], coords[0], map[key] / max);
+						}
+					}
+					else if(changedPoints) {
+						for(key in changedPoints) {
+							coords = key.split(',');
+							globe.updateDataPointMagnitude(coords[1], coords[0], changedPoints[key] / max);
+						}
+					}
 				}, true);
 			}
 		};

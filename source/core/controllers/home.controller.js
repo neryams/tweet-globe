@@ -40,9 +40,12 @@
 		};
 
 		$scope.getFiltered = function getFiltered(filter) {
+			if(!filter) {
+				$scope.coordinates = [];
+			}
 			twitterSocket.getPreviousTweets($scope.active, filter).then(function(data) {
 				$scope.coordinates = data;
-				$scope.filtering = !!filter;
+				$scope.filtering = filter;
 			});
 		};
 

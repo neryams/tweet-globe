@@ -46,7 +46,6 @@ function connect() {
 	});
 
 	return client.indices.exists({index: config.elasticIndex}).then(function(exists) {
-		console.log('index exists?', exists);
 		if(!exists) {
 			return client.indices.create({ index: config.elasticIndex });
 		}
@@ -121,7 +120,7 @@ function pullFromLocal(type, track) {
 	  index: config.elasticIndex,
 	  type: type,
 	  body: query,
-	  size: 500
+	  size: 2000
 	}).then(function(response) {
 		return response.hits;
 	}, function (error) {

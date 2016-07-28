@@ -112,7 +112,8 @@
 				shader = Shaders['earth'];
 				uniforms = THREE.UniformsUtils.clone(shader.uniforms);
 
-				uniforms['texture'].value = THREE.ImageUtils.loadTexture(imgDir+'world.jpg');
+				var loader = new THREE.TextureLoader();
+				uniforms['texture'].value = loader.load(imgDir+'world.jpg');
 
 				material = new THREE.ShaderMaterial({
 
@@ -198,7 +199,7 @@
 		//				size = data[i + 2];
 							color = colorFnWrapper(data,i);
 							size = 0;
-							addPoint(lat, lng, size, color, _this._baseGeometry);
+							createGeometry(lat, lng, size, color, _this._baseGeometry);
 						}
 					}
 					if(_this._morphTargetId === undefined) {
@@ -215,7 +216,7 @@
 					color = colorFnWrapper(data,i);
 					size = data[i + 2];
 					size = size*200;
-					addPoint(lat, lng, size, color, subgeo);
+					createGeometry(lat, lng, size, color, subgeo);
 				}
 				if (opts.animated) {
 					_this._baseGeometry.morphTargets.push({'name': opts.name, vertices: subgeo.vertices});
@@ -223,6 +224,30 @@
 					_this._baseGeometry = subgeo;
 				}
 
+			}
+
+			function updateDataPointMagnitude(lat, lng, size) {
+				if (_this._baseGeometry !== undefined) {
+					var i, n;
+					var color = colorFn(size);
+					size = size * 200;
+
+					var updatingBar = dataBars[lat + 'x' + lng];
+					if(updatingBar !== undefined) {
+						var newPoint = createGeometry(lat, lng, size, color);
+						for(i = 0, n = newPoint.vertices.length; i < n; i++) {
+							updatingBar.vertices[i].copy(newPoint.vertices[i]);
+						}
+						for(i = 0, n = newPoint.faces.length; i < n; i++) {
+							updatingBar.faces[i].color.copy(newPoint.faces[i].color);
+						}
+					} else {
+						createGeometry(lat, lng, size, color, _this._baseGeometry);
+						_this._baseGeometry.elementsNeedUpdate = true;
+					}
+
+					_this._baseGeometry.verticesNeedUpdate = true;
+				}
 			}
 
 			function createPoints() {
@@ -244,20 +269,21 @@
 							}
 						}
 						_this.points = new THREE.Mesh(_this._baseGeometry, new THREE.MeshBasicMaterial({
-									color: 0xffffff,
-									vertexColors: THREE.FaceColors,
-									morphTargets: true
-								}));
+							color: 0xffffff,
+							vertexColors: THREE.FaceColors,
+							morphTargets: true
+						}));
 					}
 					_this.points.name = "lines"; // Add _this line
 					scene.add(_this.points);
 				}
 			}
 			function removeAllPoints() {
-				scene.remove(scene.getObjectByName("lines"));
+				var lines = scene.getObjectByName("lines");
+				scene.remove(lines);
 			}
 
-			function addPoint(lat, lng, size, color, subgeo) {
+			function createGeometry(lat, lng, size, color, subgeo) {
 
 				var phi = (90 - lat) * Math.PI / 180;
 				var theta = (180 - lng) * Math.PI / 180;
@@ -279,8 +305,20 @@
 				if(point.matrixAutoUpdate){
 					point.updateMatrix();
 				}
-				subgeo.merge(point.geometry, point.matrix);
-				return point.geometry;
+				if(subgeo !== undefined) {
+					subgeo.merge(point.geometry, point.matrix);
+					// Last 8 vertices and faces in the main geometry will be the point we just added.
+					dataBars[lat + 'x' + lng] = {
+            faces: subgeo.faces.slice(-point.geometry.faces.length),
+            vertices: subgeo.vertices.slice(-point.geometry.vertices.length)
+          };
+          return true;
+				} else {
+					var result = point.geometry.clone();
+					result.applyMatrix(point.matrix);
+					
+					return result;
+				}
 			}
 
 			function onMouseDown(event) {
@@ -366,6 +404,12 @@
 
 			function render() {
 				zoom(curZoomSpeed);
+			  if ( _this._baseGeometry.vertices.length > 0 && !_this.points.visible ) {
+			  	_this.points.visible = true;
+			  }
+			  else if(_this.points.visible) {
+			  	_this.points.visible = false;
+			  }
 
 				rotation.x += (target.x - rotation.x) * 0.1;
 				rotation.y += (target.y - rotation.y) * 0.1;
@@ -413,6 +457,7 @@
 			});
 
 			this.addData = addData;
+			this.updateDataPointMagnitude = updateDataPointMagnitude;
 			this.createPoints = createPoints;
 			this.removeAllPoints = removeAllPoints; 
 			this.renderer = renderer;
