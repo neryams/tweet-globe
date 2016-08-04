@@ -24,6 +24,7 @@ node_modules/
 bower_components/
 dev/
 bin/
+dist/
 .sass-cache
 
 # Logs and databases #
@@ -47,3 +48,4 @@ Thumbs.db
 #########################
 *.sublime-*
 sftp-config.json
+dist/globe/directives/templates/globe.html
