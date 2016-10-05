@@ -39,7 +39,7 @@ module.exports = function(grunt) {
     },
 
     clean: {
-      dev: ['<%= grunt.config.get("directory") %>*'],
+      dev: ['./dev/*'],
       dist: ['./dist/*'],
       dist_post: ['./tmp/']
     },
